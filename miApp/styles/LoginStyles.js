@@ -4,10 +4,13 @@ export const loginStyles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center', // Centro horizontal
     backgroundColor: '#f2f4f8',
     padding: 20,
   },
   box: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: '#fff',
     padding: 25,
     borderRadius: 16,

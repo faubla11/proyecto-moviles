@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 export const dashboardStyles = StyleSheet.create({
   scene: {
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f6fa',
+    width: '100%',
+    maxWidth: 800, // 🧩 Evita que se extienda demasiado en pantallas grandes
+    alignSelf: 'center', // Centrado en web
   },
   title: {
     fontSize: 24,
