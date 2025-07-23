@@ -77,6 +77,8 @@ case 'config':
         </View>
       )}
 
+
+
       {/* Botón cerrar sesión SOLO móvil */}
       {!isWeb && (
         <Button

@@ -102,4 +102,49 @@ export const actualizarPerfil = async (perfil) => {
   }
 };
 
+export const agendarCita = async (cita) => {
+  try {
+    const response = await axiosClient.post('/citas', cita);
+    return response.data;
+  } catch (error) {
+    throw manejarError(error);
+  }
+};
+
+
+export const obtenerCitasPorEstado = async (estado) => {
+  try {
+    const response = await axiosClient.get(`/citas/estado/${estado.toLowerCase()}`);
+    return response.data;
+  } catch (error) {
+    throw manejarError(error);
+  }
+};
+
+export const obtenerServicios = async () => {
+  const response = await axiosClient.get('/servicios');
+  return response.data;
+};
+
+export const obtenerEstilistas = async () => {
+  const response = await axiosClient.get('/estilistas');
+  return response.data;
+};
+
+export const obtenerHorasOcupadas = async (fecha, estilista) => {
+  try {
+    const response = await axiosClient.get('/horas-ocupadas', { // Aquí la ruta correcta
+      params: { fecha, estilista }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error obtener horas ocupadas:', error);
+    return [];
+  }
+};
+
+
+
+
+
 export default axiosClient;

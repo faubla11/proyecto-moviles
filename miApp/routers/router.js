@@ -7,7 +7,8 @@ import Login from '../views/Login';
 import Register from '../views/Register';
 import Dashboard from '../views/Dashboard';
 import CitasDetalle from '../views/CitasDetalle';
-
+import AgendarCita from '../views/AgendarCita';
+  
 const Stack = createNativeStackNavigator();
 
 const Router = () => {
@@ -22,6 +23,7 @@ const Router = () => {
           <>
             <Stack.Screen name="Dashboard" component={Dashboard} />
             <Stack.Screen name="CitasDetalle" component={CitasDetalle} />
+            <Stack.Screen name="AgendarCita" component={AgendarCita} options={{ title: 'Agendar Cita' }} />
           </>
         ) : (
           <>

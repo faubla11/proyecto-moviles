@@ -1,6 +1,6 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
-import { Card, Paragraph, Button, List } from 'react-native-paper';
+import { ScrollView, View } from 'react-native';
+import { Card, Paragraph, Button, List, Title } from 'react-native-paper';
 
 const CitasSection = ({ navigation }) => {
   const citas = [
@@ -51,6 +51,19 @@ const CitasSection = ({ navigation }) => {
 
   return (
     <ScrollView style={{ padding: 10 }}>
+      {/* 🔵 Título de sección */}
+      <Title style={{ textAlign: 'center', marginBottom: 10 }}>Mis Citas</Title>
+
+      {/* 🔵 Botón para agendar nueva cita */}
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('AgendarCita')}
+        style={{ marginBottom: 20, borderRadius: 10 }}
+      >
+        Nueva Cita
+      </Button>
+
+      {/* 🔵 Tarjetas de secciones de citas */}
       {citas.map(({ key, title, icon, description, actionText, onAction, routeName, tipoCita }) => (
         <Card key={key} style={{ marginBottom: 15, borderRadius: 12, elevation: 3 }}>
           <Card.Title
