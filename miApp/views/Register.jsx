@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Title, Snackbar } from 'react-native-paper'; // <-- IMPORTA Snackbar
+import { TextInput, Button, Title, Snackbar } from 'react-native-paper';
 import { registerStyles as styles } from '../styles/RegisterStyles';
 import { registrarUsuario } from '../axiosClient';
 
@@ -9,9 +9,9 @@ const Register = ({ navigation }) => {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
+  const [codigoEstilista, setCodigoEstilista] = useState(''); // ✅ NUEVO ESTADO
   const [secureText, setSecureText] = useState(true);
 
-  // Estados para Snackbar
   const [mensajeError, setMensajeError] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
@@ -28,10 +28,9 @@ const Register = ({ navigation }) => {
     }
 
     try {
-      await registrarUsuario({ nombre, correo, password });
+      await registrarUsuario({ nombre, correo, password, codigo_estilista: codigoEstilista }); // ✅ Incluye código
       setMensajeError('Registro exitoso');
       setSnackbarVisible(true);
-      // Navegar después de un breve delay para que el usuario vea el mensaje
       setTimeout(() => {
         navigation.navigate('Login');
       }, 1500);
@@ -49,7 +48,6 @@ const Register = ({ navigation }) => {
       <View style={styles.box}>
         <Title style={styles.title}>Registro</Title>
 
-        {/* Inputs ... (igual que antes) */}
         <TextInput
           label="Nombre"
           value={nombre}
@@ -59,6 +57,7 @@ const Register = ({ navigation }) => {
           outlineStyle={styles.inputOutline}
           left={<TextInput.Icon icon="account" />}
         />
+
         <TextInput
           label="Correo electrónico"
           value={correo}
@@ -70,6 +69,7 @@ const Register = ({ navigation }) => {
           outlineStyle={styles.inputOutline}
           left={<TextInput.Icon icon="email" />}
         />
+
         <TextInput
           label="Contraseña"
           value={password}
@@ -80,6 +80,7 @@ const Register = ({ navigation }) => {
           outlineStyle={styles.inputOutline}
           left={<TextInput.Icon icon="lock" />}
         />
+
         <TextInput
           label="Confirmar contraseña"
           value={confirmPass}
@@ -95,6 +96,17 @@ const Register = ({ navigation }) => {
               onPress={() => setSecureText(!secureText)}
             />
           }
+        />
+
+        {/* ✅ CAMPO NUEVO: CÓDIGO DE ESTILISTA */}
+        <TextInput
+          label="Código de estilista (opcional)"
+          value={codigoEstilista}
+          onChangeText={setCodigoEstilista}
+          mode="outlined"
+          style={styles.input}
+          outlineStyle={styles.inputOutline}
+          left={<TextInput.Icon icon="key" />}
         />
 
         <Button
@@ -116,7 +128,6 @@ const Register = ({ navigation }) => {
         </Button>
       </View>
 
-      {/* Snackbar para mensajes de error o éxito */}
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}

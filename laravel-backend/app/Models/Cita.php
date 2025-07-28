@@ -17,6 +17,7 @@ class Cita extends Model
         'cancelada',
         'atendida',
         'con_recargo',
+        'estado',
     ];
 
     public function usuario()

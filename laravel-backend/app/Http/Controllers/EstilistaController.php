@@ -3,16 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Usuario;
 
 class EstilistaController extends Controller
 {
     public function index()
-    {
-        return response()->json([
-            'Carlos',
-            'Lucía',
-            'Andrea',
-            'Miguel',
-        ]);
-    }
+{
+    $estilistas = Usuario::where('es_estilista', true)->get(['id', 'nombre']);
+    return response()->json($estilistas);
+}
 }

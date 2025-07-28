@@ -17,30 +17,45 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cerrarSesion } from '../axiosClient';
 import CitasSection from './CitasSection';
 import Perfil from './Perfil';
+import CodigosEstilista from './CodigosEstilista';
 import { UserContext } from '../contexts/UserContext';
-import { ThemeContext } from '../contexts/ThemeContext'; // ✅ Importa el contexto del tema
+import { ThemeContext } from '../contexts/ThemeContext';
 
 const Dashboard = ({ navigation }) => {
   const isWeb = Platform.OS === 'web';
-  const { logout } = useContext(UserContext);
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext); // ✅ Extrae desde el contexto
 
+  const { usuario, logout } = useContext(UserContext);
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+
+  // Estado para índice y escena específica
   const [index, setIndex] = useState(0);
   const [sceneIndex, setSceneIndex] = useState(null);
   const [menuColapsado, setMenuColapsado] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  useEffect(() => {
+    console.log('🟢 Usuario desde contexto:', usuario);
+    if (usuario) {
+      console.log('🔎 es_admin:', usuario.es_admin);
+      console.log('🔎 es_estilista:', usuario.es_estilista);
+    }
+  }, [usuario]);
+
   const abrirMenu = () => setMenuVisible(true);
   const cerrarMenu = () => setMenuVisible(false);
 
+  // Rutas móviles: incluye "codigos" solo si es admin
   const mobileRoutes = [
     { key: 'dashboard', title: 'Inicio', icon: 'home' },
     { key: 'perfil', title: 'Perfil', icon: 'account' },
     { key: 'config', title: 'Configuración', icon: 'cog' },
+    ...(usuario?.es_admin ? [{ key: 'codigos', title: 'Cod. Estilistas', icon: 'key' }] : []),
   ];
 
+  // Rutas web con "codigos" si es admin
   const webRoutes = [
     { key: 'dashboard', title: 'Inicio', icon: 'home' },
+    ...(usuario?.es_admin ? [{ key: 'codigos', title: 'Cod. Estilistas', icon: 'key' }] : []),
   ];
 
   const routes = isWeb ? webRoutes : mobileRoutes;
@@ -61,37 +76,33 @@ const Dashboard = ({ navigation }) => {
         return <CitasSection navigation={navigation} />;
       case 'perfil':
         return <Perfil />;
-// Dentro del switch(renderScene):
+      case 'config':
+        return (
+          <View style={styles.scene}>
+            <Title style={styles.title}>Configuración</Title>
+            <Text>Opciones de configuración...</Text>
 
-case 'config':
-  return (
-    <View style={styles.scene}>
-      <Title style={styles.title}>Configuración</Title>
-      <Text>Opciones de configuración...</Text>
+            {!isWeb && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+                <Text style={{ marginRight: 10 }}>Tema: {isDarkMode ? 'Oscuro' : 'Claro'}</Text>
+                <Switch value={isDarkMode} onValueChange={toggleTheme} />
+              </View>
+            )}
 
-      {/* Toggle tema SOLO en móvil */}
-      {!isWeb && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
-          <Text style={{ marginRight: 10 }}>Tema: {isDarkMode ? 'Oscuro' : 'Claro'}</Text>
-          <Switch value={isDarkMode} onValueChange={toggleTheme} />
-        </View>
-      )}
-
-
-
-      {/* Botón cerrar sesión SOLO móvil */}
-      {!isWeb && (
-        <Button
-          mode="outlined"
-          onPress={cerrarSesionApp}
-          style={styles.button}
-          icon="logout"
-        >
-          Cerrar sesión
-        </Button>
-      )}
-    </View>
-  );
+            {!isWeb && (
+              <Button
+                mode="outlined"
+                onPress={cerrarSesionApp}
+                style={styles.button}
+                icon="logout"
+              >
+                Cerrar sesión
+              </Button>
+            )}
+          </View>
+        );
+      case 'codigos':
+        return <CodigosEstilista />;
       default:
         return null;
     }
@@ -114,24 +125,21 @@ case 'config':
                   ? 'Perfil'
                   : sceneIndex === 'config'
                   ? 'Configuración'
+                  : sceneIndex === 'codigos'
+                  ? 'Cod. Estilistas'
                   : routes[index]?.title || 'Dashboard'
               }
             />
           )}
         </Appbar.Header>
 
-        {/* Avatar y menú desplegable */}
         <View style={{ position: 'absolute', top: 12, right: 16, zIndex: 999 }}>
           <Menu
             visible={menuVisible}
             onDismiss={cerrarMenu}
             anchor={
               <TouchableOpacity onPress={abrirMenu}>
-                <Avatar.Icon
-                  size={36}
-                  icon="account"
-                  style={{ backgroundColor: '#6200ee' }}
-                />
+                <Avatar.Icon size={36} icon="account" style={{ backgroundColor: '#6200ee' }} />
               </TouchableOpacity>
             }
           >
@@ -212,7 +220,7 @@ case 'config':
     );
   }
 
-  // MÓVIL
+  // Móvil
   return (
     <BottomNavigation
       navigationState={{ index, routes: mobileRoutes }}
@@ -221,9 +229,10 @@ case 'config':
         setIndex(newIndex);
       }}
       renderScene={BottomNavigation.SceneMap({
-        dashboard: () => renderScene(mobileRoutes[0]),
-        perfil: () => renderScene(mobileRoutes[1]),
-        config: () => renderScene(mobileRoutes[2]),
+        dashboard: () => renderScene(mobileRoutes.find(r => r.key === 'dashboard')),
+        perfil: () => renderScene(mobileRoutes.find(r => r.key === 'perfil')),
+        config: () => renderScene(mobileRoutes.find(r => r.key === 'config')),
+        ...(usuario?.es_admin ? { codigos: () => renderScene(mobileRoutes.find(r => r.key === 'codigos')) } : {}),
       })}
       renderIcon={({ route, focused, color }) => (
         <MaterialCommunityIcons name={route.icon} size={24} color={color} />

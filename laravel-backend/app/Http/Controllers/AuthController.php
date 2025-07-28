@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Usuario;
 use App\Models\Perfil;
 use Illuminate\Support\Facades\Hash;
+use App\Models\CodigoEstilista;
 
 class AuthController extends Controller
 {
@@ -23,13 +24,39 @@ class AuthController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string',
             'correo' => 'required|email|unique:usuarios',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
+            'codigo_estilista' => 'nullable|string'
         ], $messages);
+
+        $esEstilista = false;
+
+        if (!empty($validated['codigo_estilista'])) {
+            $codigo = CodigoEstilista::where('codigo', $validated['codigo_estilista'])
+                        ->where('usado', false)
+                        ->first();
+
+            if ($codigo) {
+                $esEstilista = true;
+                $codigo->usado = true;
+                $codigo->save();
+            }
+        }
 
         $usuario = Usuario::create([
             'nombre' => $validated['nombre'],
             'correo' => $validated['correo'],
             'password' => bcrypt($validated['password']),
+            'es_estilista' => $esEstilista
+        ]);
+
+        // ✅ Crear perfil vacío por defecto
+        $usuario->perfil()->create([
+            'nombre' => '',
+            'apellido' => '',
+            'edad' => 0,
+            'cedula' => '',
+            'direccion' => '',
+            'telefono' => ''
         ]);
 
         return response()->json([
@@ -55,7 +82,14 @@ class AuthController extends Controller
 
         return response()->json([
             'mensaje' => 'Login exitoso',
-            'usuario' => $usuario,
+            'usuario' => [
+                'id' => $usuario->id,
+                'nombre' => $usuario->nombre,
+                'correo' => $usuario->correo,
+                'es_estilista' => $usuario->es_estilista,
+                'es_admin' => $usuario->es_admin,
+                'foto_uri' => $usuario->foto_uri
+            ],
             'perfil' => $usuario->perfil,
             'token' => $token
         ], 200);

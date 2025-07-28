@@ -90,9 +90,13 @@ class UsuarioController extends Controller
 
     if (!$perfil) {
         return response()->json(['message' => 'Perfil no encontrado'], 404);
+        
     }
 
-    return response()->json($perfil);
+    return response()->json([
+        'perfil' => $perfil,
+        'recargo_pendiente' => $usuario->tiene_recargo_pendiente,
+    ]);
 }
 
 public function actualizarPerfil(Request $request)

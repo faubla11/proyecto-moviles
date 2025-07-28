@@ -46,12 +46,13 @@ const manejarError = (error) => {
 };
 
 // 📌 Registrar nuevo usuario
-export const registrarUsuario = async ({ nombre, correo, password }) => {
+export const registrarUsuario = async ({ nombre, correo, password, codigo_estilista }) => {
   try {
     const response = await axiosClient.post('/register', {
       nombre,
       correo,
       password,
+      codigo_estilista,
     });
     return response.data;
   } catch (error) {
@@ -68,9 +69,10 @@ export const iniciarSesion = async ({ email, password }) => {
     });
     return response.data;
   } catch (error) {
-    throw manejarError(error);
+    throw new Error(error.response?.data?.message || 'Error desconocido');
   }
 };
+
 
 // 🔒 Cerrar sesión
 export const cerrarSesion = async () => {
@@ -122,9 +124,14 @@ export const obtenerCitasPorEstado = async (estado) => {
 };
 
 export const obtenerServicios = async () => {
-  const response = await axiosClient.get('/servicios');
-  return response.data;
+  try {
+    const response = await axiosClient.get('/servicios');
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    return [];
+  }
 };
+
 
 export const obtenerEstilistas = async () => {
   const response = await axiosClient.get('/estilistas');
@@ -143,7 +150,30 @@ export const obtenerHorasOcupadas = async (fecha, estilista) => {
   }
 };
 
+export const cancelarCita = async (id) => {
+  try {
+    const response = await axiosClient.post(`/citas/${id}/cancelar`);
+    return response.data;
+  } catch (error) {
+    throw manejarError(error);
+  }
+};
 
+
+// Ejemplo simplificado de carga de códigos
+export const obtenerCodigos = async (token) => {
+  try {
+    const response = await axiosClient.get('/codigos-estilista', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al cargar códigos:', error);
+    throw error;
+  }
+};
 
 
 

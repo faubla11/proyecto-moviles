@@ -6,7 +6,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\EstilistaController;
 use App\Http\Controllers\CitaController;
-
+use App\Http\Controllers\CodigoEstilistaController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -35,6 +35,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/estilistas', [EstilistaController::class, 'index']);
     Route::post('/agendar-cita', [CitaController::class, 'agendar']);
     Route::get('/horas-ocupadas', [CitaController::class, 'horasOcupadas']);
+    
+    Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar']);
+
+    Route::get('/codigos-estilista', [CodigoEstilistaController::class, 'index']);
+    Route::post('/codigos-estilista', [CodigoEstilistaController::class, 'generar']);
     
 
 });
