@@ -121,4 +121,55 @@ class CitaController extends Controller
 
         return response()->json(['message' => 'Cita cancelada con éxito.']);
     }
+
+    // Mostrar citas agendadas del estilista autenticado
+public function citasEstilistaPendientes()
+{
+    $usuario = auth()->user();
+    if (!$usuario->es_estilista) {
+        return response()->json(['error' => 'No autorizado'], 403);
+    }
+
+    $citas = Cita::where('estilista', $usuario->nombre)
+                ->where('estado', 'agendada')
+                ->get();
+
+    return response()->json($citas);
+}
+
+// Mostrar citas atendidas por el estilista autenticado
+public function citasEstilistaAtendidas()
+{
+    $usuario = auth()->user();
+    if (!$usuario->es_estilista) {
+        return response()->json(['error' => 'No autorizado'], 403);
+    }
+
+    $citas = Cita::where('estilista', $usuario->nombre)
+                ->where('estado', 'atendida')
+                ->get();
+
+    return response()->json($citas);
+}
+
+// Marcar una cita como atendida
+public function marcarComoAtendida($id)
+{
+    $usuario = auth()->user();
+    $cita = Cita::findOrFail($id);
+
+    if ($cita->estilista !== $usuario->nombre) {
+        return response()->json(['error' => 'No autorizado'], 403);
+    }
+
+    if ($cita->estado !== 'agendada') {
+        return response()->json(['error' => 'Solo se pueden atender citas agendadas'], 400);
+    }
+
+    $cita->estado = 'atendida';
+    $cita->save();
+
+    return response()->json(['message' => 'Cita marcada como atendida']);
+}
+
 }

@@ -1,9 +1,35 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Card, Paragraph, Button, List, Title } from 'react-native-paper';
+import { UserContext } from '../contexts/UserContext';
 
 const CitasSection = ({ navigation }) => {
+  const { usuario } = useContext(UserContext);
+
+  // Secciones base
   const citas = [
+    ...(usuario?.es_estilista
+      ? [
+          {
+            key: 'atender',
+            title: 'Atender Citas',
+            icon: 'scissors-cutting',
+            description: 'Citas que debes atender como estilista.',
+            actionText: 'Ver citas por atender',
+            routeName: 'CitasDetalle',
+            tipoCita: 'PorAtender', // Tipo personalizado para estilista
+          },
+          {
+          key: 'historial-estilista',
+          title: 'Historial de Atenciones',
+          icon: 'history',
+          description: 'Citas que ya has atendido como estilista.',
+          actionText: 'Ver historial',
+          routeName: 'CitasDetalle',
+          tipoCita: 'HistorialAtendidas',
+        },
+        ]
+      : []),
     {
       key: 'agendadas',
       title: 'Citas Agendadas',
@@ -35,9 +61,9 @@ const CitasSection = ({ navigation }) => {
       key: 'ubicacion',
       title: 'Ubicación',
       icon: 'map-marker',
-      description: 'Calle Falsa 123, Peluquería Bryan Style.',
+      description: 'Ver tu ubicación en el mapa.',
       actionText: 'Ver en mapa',
-      onAction: () => alert('Abrir mapa'),
+      routeName: 'Ubicacion',
     },
     {
       key: 'resenas',
@@ -51,10 +77,8 @@ const CitasSection = ({ navigation }) => {
 
   return (
     <ScrollView style={{ padding: 10 }}>
-      {/* 🔵 Título de sección */}
       <Title style={{ textAlign: 'center', marginBottom: 10 }}>Mis Citas</Title>
 
-      {/* 🔵 Botón para agendar nueva cita */}
       <Button
         mode="contained"
         onPress={() => navigation.navigate('AgendarCita')}
@@ -63,29 +87,30 @@ const CitasSection = ({ navigation }) => {
         Nueva Cita
       </Button>
 
-      {/* 🔵 Tarjetas de secciones de citas */}
-      {citas.map(({ key, title, icon, description, actionText, onAction, routeName, tipoCita }) => (
-        <Card key={key} style={{ marginBottom: 15, borderRadius: 12, elevation: 3 }}>
-          <Card.Title
-            title={title}
-            left={(props) => <List.Icon {...props} icon={icon} />}
-          />
-          <Card.Content>
-            <Paragraph>{description}</Paragraph>
-          </Card.Content>
-          <Card.Actions>
-            <Button
-              onPress={
-                onAction
-                  ? onAction
-                  : () => navigation.navigate(routeName, { tipoCita })
-              }
-            >
-              {actionText}
-            </Button>
-          </Card.Actions>
-        </Card>
-      ))}
+      {citas.map(
+        ({ key, title, icon, description, actionText, onAction, routeName, tipoCita }) => (
+          <Card key={key} style={{ marginBottom: 15, borderRadius: 12, elevation: 3 }}>
+            <Card.Title
+              title={title}
+              left={(props) => <List.Icon {...props} icon={icon} />}
+            />
+            <Card.Content>
+              <Paragraph>{description}</Paragraph>
+            </Card.Content>
+            <Card.Actions>
+              <Button
+                onPress={
+                  onAction
+                    ? onAction
+                    : () => navigation.navigate(routeName, { tipoCita })
+                }
+              >
+                {actionText}
+              </Button>
+            </Card.Actions>
+          </Card>
+        )
+      )}
     </ScrollView>
   );
 };

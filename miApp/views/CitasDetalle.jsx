@@ -1,5 +1,3 @@
-// CitasDetalle.jsx actualizado con mensaje de recargo y botón para cancelar
-
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -14,6 +12,9 @@ import { Title, Card, Button, Snackbar } from 'react-native-paper';
 import {
   obtenerCitasPorEstado,
   cancelarCita,
+  obtenerCitasPendientesEstilista,
+  marcarCitaComoAtendida,
+  obtenerCitasAtendidasEstilista,
 } from '../axiosClient';
 
 const CitasDetalle = ({ route }) => {
@@ -26,14 +27,22 @@ const CitasDetalle = ({ route }) => {
     cargarCitas();
   }, [tipoCita]);
 
-  const cargarCitas = async () => {
-    try {
-      const citasData = await obtenerCitasPorEstado(tipoCita);
-      setCitas(citasData);
-    } catch (error) {
-      console.error('Error al obtener citas:', error.message);
+const cargarCitas = async () => {
+  try {
+    let citasData = [];
+    if (tipoCita === 'PorAtender') {
+      citasData = await obtenerCitasPendientesEstilista();
+    } else if (tipoCita === 'HistorialAtendidas') {
+      citasData = await obtenerCitasAtendidasEstilista();
+    } else {
+      citasData = await obtenerCitasPorEstado(tipoCita);
     }
-  };
+    setCitas(citasData);
+  } catch (error) {
+    console.error('Error al obtener citas:', error.message);
+  }
+};
+
 
   const handleCancelarCita = async (id) => {
     Alert.alert(
@@ -52,6 +61,31 @@ const CitasDetalle = ({ route }) => {
             } catch (error) {
               console.error(error);
               setMensaje(error.message || 'Error al cancelar');
+              setVisible(true);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleMarcarComoAtendida = async (id) => {
+    Alert.alert(
+      '¿Atender cita?',
+      '¿Deseas marcar esta cita como atendida?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sí',
+          onPress: async () => {
+            try {
+              const res = await marcarCitaComoAtendida(id);
+              setMensaje(res.message || 'Cita atendida');
+              setVisible(true);
+              cargarCitas();
+            } catch (error) {
+              console.error(error);
+              setMensaje(error.message || 'Error al marcar cita');
               setVisible(true);
             }
           },
@@ -85,6 +119,18 @@ const CitasDetalle = ({ route }) => {
           </Button>
         </Card.Actions>
       )}
+
+      {tipoCita === 'PorAtender' && (
+        <Card.Actions>
+          <Button
+            onPress={() => handleMarcarComoAtendida(item.id)}
+            icon="check-circle"
+            color="green"
+          >
+            Marcar como Atendida
+          </Button>
+        </Card.Actions>
+      )}
     </Card>
   );
 
@@ -94,7 +140,25 @@ const CitasDetalle = ({ route }) => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={true}
       >
-        <Title style={styles.title}>Citas {tipoCita}</Title>
+                <Title style={styles.title}>
+          {(() => {
+            switch (tipoCita) {
+              case 'PorAtender':
+                return 'Citas por Atender';
+              case 'HistorialAtendidas':
+                return 'Historial de Atenciones';
+              case 'Agendadas':
+                return 'Citas Agendadas';
+              case 'Canceladas':
+                return 'Citas Canceladas';
+              case 'Atendidas':
+                return 'Citas Atendidas';
+              default:
+                return 'Citas';
+            }
+          })()}
+        </Title>
+
         {citas.length === 0 ? (
           <Text style={{ textAlign: 'center', marginTop: 20 }}>
             No hay citas registradas
@@ -151,7 +215,7 @@ const styles = {
   recargoText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#FFA726', // naranja suave
+    color: '#FFA726',
     fontWeight: 'bold',
   },
 };

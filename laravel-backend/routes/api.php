@@ -40,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/codigos-estilista', [CodigoEstilistaController::class, 'index']);
     Route::post('/codigos-estilista', [CodigoEstilistaController::class, 'generar']);
+
+
+    Route::get('/estilista/citas/pendientes', [CitaController::class, 'citasEstilistaPendientes']);
+    Route::get('/estilista/citas/atendidas', [CitaController::class, 'citasEstilistaAtendidas']);
+    Route::post('/estilista/citas/{id}/atender', [CitaController::class, 'marcarComoAtendida']);
+
     
 
 });

@@ -175,6 +175,22 @@ export const obtenerCodigos = async (token) => {
   }
 };
 
+export const obtenerCitasPendientesEstilista = async () => {
+  const res = await axiosClient.get('/estilista/citas/pendientes');
+  return res.data;
+};
+
+export const obtenerCitasAtendidasEstilista = async () => {
+  const res = await axiosClient.get('/estilista/citas/atendidas');
+  return res.data;
+};
+
+export const marcarCitaComoAtendida = async (id) => {
+  const res = await axiosClient.post(`/estilista/citas/${id}/atender`);
+  return res.data;
+};
+
+
 
 
 export default axiosClient;
