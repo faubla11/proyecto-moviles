@@ -22,12 +22,14 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { agendarCitaStyles as styles } from '../styles/AgendarCitaStyles';
+import { Calendar } from 'react-native-calendars';
 import {
   agendarCita,
   obtenerServicios,
   obtenerEstilistas,
   obtenerHorasOcupadas,
   obtenerPerfil,
+  obtenerDiasBloqueados,
 } from '../axiosClient';
 
 
@@ -45,6 +47,7 @@ const AgendarCita = ({ navigation }) => {
   const [loadingHoras, setLoadingHoras] = useState(false);
   const [tieneRecargo, setTieneRecargo] = useState(false);
   const [mostrarAlertaRecargo, setMostrarAlertaRecargo] = useState(false);
+  const [diasBloqueados, setDiasBloqueados] = useState([]); // formato: ['2025-08-01', '2025-08-02']
 
 
   const showDatePicker = () => {
@@ -75,25 +78,27 @@ useEffect(() => {
 }, []);
 
 
-  useEffect(() => {
-    const cargarHorasOcupadas = async () => {
-      if (fecha && estilista) {
-        setLoadingHoras(true);
-        try {
-          const ocupadasRaw = await obtenerHorasOcupadas(fecha, estilista);
-          const ocupadas = ocupadasRaw.map((h) => h.toString());
-          setHorasOcupadas(ocupadas);
-        } catch (error) {
-          console.error(error);
-          setHorasOcupadas([]);
-        }
-        setLoadingHoras(false);
-      } else {
+useEffect(() => {
+  const cargarHorasYBloqueos = async () => {
+    if (fecha && estilista) {
+      setLoadingHoras(true);
+      try {
+        const ocupadasRaw = await obtenerHorasOcupadas(fecha, estilista);
+        const bloqueados = await obtenerDiasBloqueados(estilista);
+        const ocupadas = ocupadasRaw.map((h) => h.toString());
+        setHorasOcupadas(ocupadas);
+        setDiasBloqueados(bloqueados); // formato: ["2025-08-01", "2025-08-02"]
+      } catch (error) {
+        console.error(error);
         setHorasOcupadas([]);
+        setDiasBloqueados([]);
       }
-    };
-    cargarHorasOcupadas();
-  }, [fecha, estilista]);
+      setLoadingHoras(false);
+    }
+  };
+  cargarHorasYBloqueos();
+}, [fecha, estilista]);
+
 
 const handleAgendar = () => {
   if (!servicio || !estilista || !fecha || !hora) {
@@ -144,14 +149,24 @@ const handleAgendar = () => {
 };
 
   const handleConfirmDate = (selectedDate) => {
-    if (!selectedDate) return;
-    setDatePickerVisibility(false);
-    const y = selectedDate.getFullYear();
-    const m = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
-    const d = selectedDate.getDate().toString().padStart(2, '0');
-    setFecha(`${y}-${m}-${d}`);
-    setHora('');
-  };
+      if (!selectedDate) return;
+
+      const y = selectedDate.getFullYear();
+      const m = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+      const d = selectedDate.getDate().toString().padStart(2, '0');
+      const formateada = `${y}-${m}-${d}`;
+
+
+      // Verificar si la fecha está bloqueada
+      if (diasBloqueados.includes(formateada)) {
+      Alert.alert('Fecha bloqueada', 'Este día no está disponible para este estilista.');
+      return;
+      }
+
+      setFecha(formateada);
+      setHora('');
+      setDatePickerVisibility(false);
+      };
 
   const generarHorasDisponibles = () => {
     const horas = [];
@@ -180,130 +195,149 @@ const handleAgendar = () => {
 
   const horasDisponibles = fecha && estilista ? generarHorasDisponibles() : [];
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.formWrapper}>
-            <Title style={{ textAlign: 'center', marginBottom: 16 }}>
+              return (
+              <SafeAreaView style={{ flex: 1 }}>
+              <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+              >
+              <ScrollView
+              contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+              keyboardShouldPersistTaps="handled"
+              >
+              <View style={{ flex: 1 }}>
+              <Title style={{ textAlign: 'center', marginBottom: 16 }}>
               Agendar Nueva Cita
-            </Title>
+              </Title>
 
-            <Text style={styles.label}>Servicio</Text>
-            <View style={styles.pickerContainer}>
-              <Picker selectedValue={servicio} onValueChange={setServicio}>
-                <Picker.Item label="Seleccione un servicio" value="" />
-                {servicios.map((s, idx) => (
-                  <Picker.Item key={idx} label={s} value={s} />
-                ))}
-              </Picker>
-            </View>
-
-            <Text style={styles.label}>Estilista</Text>
-            <View style={styles.pickerContainer}>
-              <Picker selectedValue={estilista} onValueChange={setEstilista}>
-                <Picker.Item label="Seleccione un estilista" value="" />
-                {estilistas.map((e, idx) => (
-                  <Picker.Item key={e.id} label={e.nombre} value={e.nombre} />
-                ))}
-              </Picker>
-            </View>
-
-            {estilista && (
-              <>
-                <Text style={styles.label}>Fecha</Text>
-                {Platform.OS === 'web' ? (
-                  <View style={{ marginBottom: 12 }}>
-                    <DatePicker
-                      selected={fecha ? new Date(fecha + 'T00:00:00') : null}
-                      onChange={(date) => handleConfirmDate(date)}
-                      minDate={new Date()}
-                      maxDate={new Date(new Date().setMonth(new Date().getMonth() + 3))}
-                      dateFormat="yyyy-MM-dd"
-                      placeholderText="Seleccione una fecha"
-                      className="react-datepicker__input"
-                      style={{ width: '100%' }}
-                    />
-                  </View>
-                ) : (
-                  <TouchableOpacity onPress={showDatePicker}>
-                    <View pointerEvents="none">
-                      <TextInput
-                        label="Fecha"
-                        value={fecha}
-                        mode="outlined"
-                        editable={false}
-                        style={styles.input}
-                      />
+                    <Text style={styles.label}>Servicio</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker selectedValue={servicio} onValueChange={setServicio}>
+                        <Picker.Item label="Seleccione un servicio" value="" />
+                        {servicios.map((s, idx) => (
+                          <Picker.Item key={idx} label={s} value={s} />
+                        ))}
+                      </Picker>
                     </View>
-                  </TouchableOpacity>
-                )}
-                {Platform.OS !== 'web' && (
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirmDate}
-                    onCancel={hideDatePicker}
-                    minimumDate={new Date()}
-                    maximumDate={new Date(new Date().setMonth(new Date().getMonth() + 3))}
-                  />
-                )}
-              </>
-            )}
 
-            {fecha && estilista && (
-              <>
-                <Text style={styles.label}>Hora</Text>
-                {loadingHoras ? (
-                  <ActivityIndicator style={{ marginTop: 10 }} />
-                ) : (
-                  <View style={styles.pickerContainer}>
-                    <Picker selectedValue={hora} onValueChange={setHora}>
-                      <Picker.Item label="Seleccione una hora" value="" />
-                      {horasDisponibles.length === 0 ? (
-                        <Picker.Item label="No hay horas disponibles" value="" />
-                      ) : (
-                        horasDisponibles.map((h, idx) => (
-                          <Picker.Item key={idx} label={h} value={h} />
-                        ))
-                      )}
-                    </Picker>
+                    <Text style={styles.label}>Estilista</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker selectedValue={estilista} onValueChange={setEstilista}>
+                        <Picker.Item label="Seleccione un estilista" value="" />
+                        {estilistas.map((e) => (
+                          <Picker.Item key={e.id} label={e.nombre} value={e.nombre} />
+                        ))}
+                      </Picker>
+                    </View>
+
+                    {estilista && (
+                      <>
+                        <Text style={styles.label}>Fecha</Text>
+                        {Platform.OS === 'web' ? (
+                          <View style={{ marginBottom: 12 }}>
+                            <DatePicker
+                              selected={fecha ? new Date(fecha + 'T00:00:00') : null}
+                              onChange={(date) => handleConfirmDate(date)}
+                              minDate={new Date()}
+                              maxDate={new Date(new Date().setMonth(new Date().getMonth() + 3))}
+                              dateFormat="yyyy-MM-dd"
+                              placeholderText="Seleccione una fecha"
+                              excludeDates={diasBloqueados.map(f => new Date(f))}
+                              className="react-datepicker__input"
+                              style={{ width: '100%' }}
+                            />
+                          </View>
+                        ) : (
+                          <Calendar
+                            onDayPress={(day) => {
+                              if (diasBloqueados.includes(day.dateString)) {
+                                Alert.alert('Fecha no disponible', 'Este estilista no está disponible en esa fecha.');
+                              } else {
+                                setFecha(day.dateString);
+                                setHora('');
+                              }
+                            }}
+                            minDate={new Date().toISOString().split('T')[0]}
+                            maxDate={new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0]}
+                            markedDates={{
+                              ...diasBloqueados.reduce((acc, fecha) => {
+                                acc[fecha] = {
+                                  disabled: true,
+                                  disableTouchEvent: true,
+                                  marked: true,
+                                  dotColor: '#FF6F61',
+                                };
+                                return acc;
+                              }, {}),
+                              ...(fecha ? {
+                                [fecha]: {
+                                  selected: true,
+                                  selectedColor: '#00BFA5',
+                                  selectedTextColor: '#fff',
+                                },
+                              } : {}),
+                            }}
+                            theme={{
+                              todayTextColor: '#00BFA5',
+                              selectedDayBackgroundColor: '#00BFA5',
+                              arrowColor: '#00BFA5',
+                            }}
+                            style={{ marginBottom: 20 }}
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {fecha && estilista && (
+                      <>
+                        <Text style={styles.label}>Hora</Text>
+                        {loadingHoras ? (
+                          <ActivityIndicator style={{ marginTop: 10 }} />
+                        ) : (
+                          <View style={styles.pickerContainer}>
+                            <Picker selectedValue={hora} onValueChange={setHora}>
+                              <Picker.Item label="Seleccione una hora" value="" />
+                              {horasDisponibles.length === 0 ? (
+                                <Picker.Item label="No hay horas disponibles" value="" />
+                              ) : (
+                                horasDisponibles.map((h, idx) => (
+                                  <Picker.Item key={idx} label={h} value={h} />
+                                ))
+                              )}
+                            </Picker>
+                          </View>
+                        )}
+                      </>
+                    )}
+
+                    <Button mode="contained" onPress={handleAgendar} style={styles.button}>
+                      Agendar
+                    </Button>
+
+                    <Snackbar
+                      visible={showSuccess}
+                      onDismiss={() => setShowSuccess(false)}
+                      duration={3000}
+                      style={styles.snackbar}
+                    >
+                      <Text style={styles.snackbarText}>¡Cita agendada con éxito!</Text>
+                    </Snackbar>
+
+                    <Snackbar
+                      visible={mostrarAlertaRecargo}
+                      onDismiss={() => setMostrarAlertaRecargo(false)}
+                      duration={4000}
+                      style={[styles.snackbar, { backgroundColor: '#FFA726' }]}
+                    >
+                      <Text style={[styles.snackbarText, { fontWeight: 'bold' }]}>
+                        Tienes un recargo pendiente por cancelación tardía.
+                      </Text>
+                    </Snackbar>
                   </View>
-                )}
-              </>
-            )}
-
-            <Button mode="contained" onPress={handleAgendar} style={styles.button}>
-              Agendar
-            </Button>
-
-            <Snackbar
-              visible={showSuccess}
-              onDismiss={() => setShowSuccess(false)}
-              duration={3000}
-              style={styles.snackbar}
-            >
-              <Text style={styles.snackbarText}>¡Cita agendada con éxito!</Text>
-            </Snackbar>
-                      <Snackbar
-            visible={mostrarAlertaRecargo}
-            onDismiss={() => setMostrarAlertaRecargo(false)}
-            duration={4000}
-            style={[styles.snackbar, { backgroundColor: '#FFA726' }]}
-          >
-            <Text style={[styles.snackbarText, { fontWeight: 'bold' }]}>
-              Tienes un recargo pendiente por cancelación tardía.
-            </Text>
-          </Snackbar>
-
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
-};
+                </ScrollView>
+              </KeyboardAvoidingView>
+              </SafeAreaView> );
+              };
 
 export default AgendarCita;

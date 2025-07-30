@@ -9,13 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('bloqueo_estilistas', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+        public function up()
+        {
+            Schema::create('bloqueos_estilista', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('estilista_id');
+                $table->date('fecha');
+                $table->timestamps();
+
+                $table->foreign('estilista_id')->references('id')->on('usuarios')->onDelete('cascade');
+            });
+        }
+
 
     /**
      * Reverse the migrations.

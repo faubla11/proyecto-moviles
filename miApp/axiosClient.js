@@ -206,7 +206,16 @@ export const filtrarResenas = async (filtros) => {
   return res.data;
 };
 
+export const obtenerDiasBloqueados = async (estilista) => {
+  const res = await axiosClient.get(`/dias-bloqueados`, {
+    params: { estilista }
+  });
+  return res.data;
+};
 
-
+export const bloquearEstilista = async (datos) => {
+  const res = await axiosClient.post('/bloquear-estilista', datos);
+  return res.data;
+};
 
 export default axiosClient;

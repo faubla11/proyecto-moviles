@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { Card, Paragraph, Button, List, Title } from 'react-native-paper';
 import { UserContext } from '../contexts/UserContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CitasSection = ({ navigation }) => {
   const { usuario } = useContext(UserContext);
@@ -18,19 +17,20 @@ const CitasSection = ({ navigation }) => {
             description: 'Citas que debes atender como estilista.',
             actionText: 'Ver citas por atender',
             routeName: 'CitasDetalle',
-            tipoCita: 'PorAtender', // Tipo personalizado para estilista
+            tipoCita: 'PorAtender',
           },
           {
-          key: 'historial-estilista',
-          title: 'Historial de Atenciones',
-          icon: 'history',
-          description: 'Citas que ya has atendido como estilista.',
-          actionText: 'Ver historial',
-          routeName: 'CitasDetalle',
-          tipoCita: 'HistorialAtendidas',
-        },
+            key: 'historial-estilista',
+            title: 'Historial de Atenciones',
+            icon: 'history',
+            description: 'Citas que ya has atendido como estilista.',
+            actionText: 'Ver historial',
+            routeName: 'CitasDetalle',
+            tipoCita: 'HistorialAtendidas',
+          },
         ]
       : []),
+
     {
       key: 'agendadas',
       title: 'Citas Agendadas',
@@ -67,53 +67,66 @@ const CitasSection = ({ navigation }) => {
       routeName: 'Ubicacion',
     },
     {
-    key: 'resenas',
-    title: 'Reseñas',
-    icon: 'star-circle',
-    description: 'Reseñas de los clientes.',
-    actionText: 'Leer opiniones',
-    routeName: 'VerResenas',  
+      key: 'resenas',
+      title: 'Reseñas',
+      icon: 'star-circle',
+      description: 'Reseñas de los clientes.',
+      actionText: 'Leer opiniones',
+      routeName: 'VerResenas',
     },
+
+    // 🛠️ Tarjeta solo para admin: bloquear/liberar estilistas
+    ...(usuario?.es_admin
+      ? [
+          {
+            key: 'bloquear-estilista',
+            title: 'Bloqueo de Estilistas',
+            icon: 'calendar-remove-outline',
+            description: 'Bloquea o libera la disponibilidad de un estilista.',
+            actionText: 'Gestionar bloqueos',
+            routeName: 'BloqueoEstilistas',
+          },
+        ]
+      : []),
   ];
 
   return (
-    <ScrollView style={{ padding: 10 }}>
-      <Title style={{ textAlign: 'center', marginBottom: 10 }}>Mis Citas</Title>
+<ScrollView contentContainerStyle={{ padding: 10, paddingBottom: 60 }}>
+<Title style={{ textAlign: 'center', marginBottom: 10 }}>Mis Citas</Title>
 
-      <Button
-        mode="contained"
-        onPress={() => navigation.navigate('AgendarCita')}
-        style={{ marginBottom: 20, borderRadius: 10 }}
-      >
-        Nueva Cita
-      </Button>
+<Button
+  mode="contained"
+  onPress={() => navigation.navigate('AgendarCita')}
+  style={{ marginBottom: 20, borderRadius: 10 }}
+>
+  Nueva Cita
+</Button>
 
-      {citas.map(
-        ({ key, title, icon, description, actionText, onAction, routeName, tipoCita }) => (
-          <Card key={key} style={{ marginBottom: 15, borderRadius: 12, elevation: 3 }}>
-            <Card.Title
-              title={title}
-              left={(props) => <List.Icon {...props} icon={icon} />}
-            />
-            <Card.Content>
-              <Paragraph>{description}</Paragraph>
-            </Card.Content>
-            <Card.Actions>
-              <Button
-                onPress={
-                  onAction
-                    ? onAction
-                    : () => navigation.navigate(routeName, { tipoCita })
-                }
-              >
-                {actionText}
-              </Button>
-            </Card.Actions>
-          </Card>
-        )
-      )}
-    </ScrollView>
-  );
+{citas.map(
+  ({ key, title, icon, description, actionText, onAction, routeName, tipoCita }) => (
+    <Card key={key} style={{ marginBottom: 15, borderRadius: 12, elevation: 3 }}>
+      <Card.Title
+        title={title}
+        left={(props) => <List.Icon {...props} icon={icon} />}
+      />
+      <Card.Content>
+        <Paragraph>{description}</Paragraph>
+      </Card.Content>
+      <Card.Actions>
+        <Button
+          onPress={
+            onAction
+              ? onAction
+              : () => navigation.navigate(routeName, { tipoCita })
+          }
+        >
+          {actionText}
+        </Button>
+      </Card.Actions>
+    </Card>
+  )
+)}
+</ScrollView> );
 };
 
 export default CitasSection;

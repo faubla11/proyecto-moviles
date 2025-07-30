@@ -26,8 +26,26 @@ public function store(Request $request)
         'hora' => 'required|string',
     ]);
 
-    // Verificar si el usuario ya tiene 3 citas activas
-    $citasActivas = Cita::where('usuario_id', $usuario->id)
+    // Obtener el estilista por nombre
+    $usuarioEstilista = \App\Models\Usuario::where('nombre', $validated['estilista'])->first();
+
+    if (!$usuarioEstilista) {
+        return response()->json(['error' => 'Estilista no encontrado.'], 404);
+    }
+
+    // Validar si el día está bloqueado
+    $bloqueado = \App\Models\BloqueoEstilista::where('estilista_id', $usuarioEstilista->id)
+        ->where('fecha', $validated['fecha'])
+        ->exists();
+
+    if ($bloqueado) {
+        return response()->json([
+            'error' => 'Ese día está bloqueado para este estilista.'
+        ], 403);
+    }
+
+    // Validar si ya tiene 3 citas agendadas
+    $citasActivas = \App\Models\Cita::where('usuario_id', $usuario->id)
                         ->where('estado', 'agendada')
                         ->count();
 
@@ -37,8 +55,8 @@ public function store(Request $request)
         ], 403);
     }
 
-    // Verificar si ya existe una cita para ese estilista en esa fecha y hora
-    $existe = Cita::where('fecha', $validated['fecha'])
+    // Validar si el estilista ya tiene una cita en esa fecha y hora
+    $existe = \App\Models\Cita::where('fecha', $validated['fecha'])
         ->where('hora', $validated['hora'])
         ->where('estilista', $validated['estilista'])
         ->exists();
@@ -47,8 +65,8 @@ public function store(Request $request)
         return response()->json(['error' => 'Esa hora ya está ocupada para ese estilista.'], 409);
     }
 
-    // Crear la cita con o sin recargo
-    $cita = Cita::create([
+    // Crear la cita
+    $cita = \App\Models\Cita::create([
         'usuario_id' => $usuario->id,
         'servicio' => $validated['servicio'],
         'estilista' => $validated['estilista'],
@@ -58,7 +76,7 @@ public function store(Request $request)
         'con_recargo' => $usuario->tiene_recargo_pendiente ? true : false,
     ]);
 
-    // Limpiar el recargo pendiente si ya se aplicó
+    // Limpiar recargo si se aplicó
     if ($usuario->tiene_recargo_pendiente) {
         $usuario->tiene_recargo_pendiente = false;
         $usuario->save();
@@ -66,6 +84,7 @@ public function store(Request $request)
 
     return response()->json(['message' => 'Cita creada', 'cita' => $cita], 201);
 }
+
 
 
     public function citasPorEstado($estado)

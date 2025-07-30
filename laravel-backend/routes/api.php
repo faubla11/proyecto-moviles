@@ -8,6 +8,7 @@ use App\Http\Controllers\EstilistaController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\CodigoEstilistaController;
 use App\Http\Controllers\ResenaController;
+use App\Http\Controllers\BloqueoEstilistaController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -51,4 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/resenas', [ResenaController::class, 'index']);
     Route::post('/resenas', [ResenaController::class, 'store']);
     Route::get('/resenas/filtrar', [ResenaController::class, 'filtrar']);
+
+
+    Route::post('/bloquear-estilista', [BloqueoEstilistaController::class, 'bloquear']);
+    Route::delete('/bloquear-estilista/{id}', [BloqueoEstilistaController::class, 'desbloquear']);
+    Route::get('/bloquear-estilista', [BloqueoEstilistaController::class, 'listar']);
+    Route::get('/dias-bloqueados', [BloqueoEstilistaController::class, 'diasBloqueados']);
+
 });

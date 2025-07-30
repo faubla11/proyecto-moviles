@@ -12,6 +12,7 @@ import AgendarCita from '../views/AgendarCita';
 import Ubicacion from '../views/Ubicacion';
 import CrearResena from '../views/CrearResena';
 import VerResenas from '../views/VerResenas';
+import BloqueoEstilistas from '../views/BloqueoEstilistas';
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ const Router = () => {
               <Stack.Screen name="Ubicacion" component={Ubicacion} />
               <Stack.Screen name="CrearResena" component={CrearResena} />
               <Stack.Screen name="VerResenas" component={VerResenas} />
+              <Stack.Screen name="BloqueoEstilistas" component={BloqueoEstilistas} />
             </>
           ) : (
             <>

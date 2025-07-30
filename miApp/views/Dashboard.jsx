@@ -21,6 +21,8 @@ import CodigosEstilista from './CodigosEstilista';
 import { UserContext } from '../contexts/UserContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native';
+
 
 const Dashboard = ({ navigation }) => {
   const isWeb = Platform.OS === 'web';
@@ -109,117 +111,119 @@ const Dashboard = ({ navigation }) => {
     }
   };
 
-  if (isWeb) {
-    const drawerWidth = menuColapsado ? 72 : 220;
+if (isWeb) {
+  const drawerWidth = menuColapsado ? 72 : 220;
 
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <Appbar.Header style={{ justifyContent: 'flex-start' }}>
-          <Appbar.Action
-            icon={menuColapsado ? 'menu-open' : 'menu'}
-            onPress={() => setMenuColapsado(!menuColapsado)}
-          />
-          {!menuColapsado && (
-            <Appbar.Content
-              title={
-                sceneIndex === 'perfil'
-                  ? 'Perfil'
-                  : sceneIndex === 'config'
-                  ? 'Configuración'
-                  : sceneIndex === 'codigos'
-                  ? 'Cod. Estilistas'
-                  : routes[index]?.title || 'Dashboard'
-              }
-            />
-          )}
-        </Appbar.Header>
-
-        <View style={{ position: 'absolute', top: 12, right: 16, zIndex: 999 }}>
-          <Menu
-            visible={menuVisible}
-            onDismiss={cerrarMenu}
-            anchor={
-              <TouchableOpacity onPress={abrirMenu}>
-                <Avatar.Icon size={36} icon="account" style={{ backgroundColor: '#6200ee' }} />
-              </TouchableOpacity>
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <Appbar.Header style={{ justifyContent: 'flex-start' }}>
+        <Appbar.Action
+          icon={menuColapsado ? 'menu-open' : 'menu'}
+          onPress={() => setMenuColapsado(!menuColapsado)}
+        />
+        {!menuColapsado && (
+          <Appbar.Content
+            title={
+              sceneIndex === 'perfil'
+                ? 'Perfil'
+                : sceneIndex === 'config'
+                ? 'Configuración'
+                : sceneIndex === 'codigos'
+                ? 'Cod. Estilistas'
+                : routes[index]?.title || 'Dashboard'
             }
-          >
-            <Menu.Item
-              onPress={() => {
-                cerrarMenu();
-                setSceneIndex('perfil');
-              }}
-              title="Perfil"
-              leadingIcon="account"
-            />
-            <Menu.Item
-              onPress={() => {
-                cerrarMenu();
-                setSceneIndex('config');
-              }}
-              title="Configuración"
-              leadingIcon="cog"
-            />
-            <Menu.Item
-              onPress={() => {
-                toggleTheme();
-              }}
-              title={`Tema: ${isDarkMode ? 'Oscuro' : 'Claro'}`}
-              leadingIcon={isDarkMode ? 'weather-night' : 'white-balance-sunny'}
-              right={() => (
-                <Switch value={isDarkMode} onValueChange={toggleTheme} />
+          />
+        )}
+      </Appbar.Header>
+
+      <View style={{ position: 'absolute', top: 12, right: 16, zIndex: 999 }}>
+        <Menu
+          visible={menuVisible}
+          onDismiss={cerrarMenu}
+          anchor={
+            <TouchableOpacity onPress={abrirMenu}>
+              <Avatar.Icon size={36} icon="account" style={{ backgroundColor: '#6200ee' }} />
+            </TouchableOpacity>
+          }
+        >
+          <Menu.Item
+            onPress={() => {
+              cerrarMenu();
+              setSceneIndex('perfil');
+            }}
+            title="Perfil"
+            leadingIcon="account"
+          />
+          <Menu.Item
+            onPress={() => {
+              cerrarMenu();
+              setSceneIndex('config');
+            }}
+            title="Configuración"
+            leadingIcon="cog"
+          />
+          <Menu.Item
+            onPress={() => {
+              toggleTheme();
+            }}
+            title={`Tema: ${isDarkMode ? 'Oscuro' : 'Claro'}`}
+            leadingIcon={isDarkMode ? 'weather-night' : 'white-balance-sunny'}
+            right={() => <Switch value={isDarkMode} onValueChange={toggleTheme} />}
+          />
+          <Menu.Item
+            onPress={() => {
+              cerrarMenu();
+              cerrarSesionApp();
+            }}
+            title="Cerrar sesión"
+            leadingIcon="logout"
+          />
+        </Menu>
+      </View>
+
+      <View style={{ flexDirection: 'row', height: '100vh', overflow: 'hidden' }}>
+        <View
+          style={{
+            width: drawerWidth,
+            backgroundColor: '#f2f2f2',
+            paddingTop: 10,
+            borderRightWidth: 1,
+            borderRightColor: '#ddd',
+            height: '100vh',
+          }}
+        >
+          {routes.map((r, i) => (
+            <Drawer.Item
+              key={r.key}
+              label={menuColapsado ? '' : r.title}
+              icon={({ size, color }) => (
+                <MaterialCommunityIcons
+                  name={r.icon}
+                  size={24}
+                  color={color}
+                  style={{ alignSelf: 'center' }}
+                />
               )}
-            />
-            <Menu.Item
+              style={{ justifyContent: 'center' }}
+              active={index === i && !sceneIndex}
               onPress={() => {
-                cerrarMenu();
-                cerrarSesionApp();
+                setSceneIndex(null);
+                setIndex(i);
               }}
-              title="Cerrar sesión"
-              leadingIcon="logout"
             />
-          </Menu>
+          ))}
         </View>
 
-        <View style={{ flexDirection: 'row', height: '100%' }}>
-          <View
-            style={{
-              width: drawerWidth,
-              backgroundColor: '#f2f2f2',
-              paddingTop: 10,
-              borderRightWidth: 1,
-              borderRightColor: '#ddd',
-            }}
-          >
-            {routes.map((r, i) => (
-              <Drawer.Item
-                key={r.key}
-                label={menuColapsado ? '' : r.title}
-                icon={({ size, color }) => (
-                  <MaterialCommunityIcons
-                    name={r.icon}
-                    size={24}
-                    color={color}
-                    style={{ alignSelf: 'center' }}
-                  />
-                )}
-                style={{ justifyContent: 'center' }}
-                active={index === i && !sceneIndex}
-                onPress={() => {
-                  setSceneIndex(null);
-                  setIndex(i);
-                }}
-              />
-            ))}
-          </View>
-
-          <View style={{ flex: 1, padding: 20 }}>
+        <View style={{ flex: 1, height: '100vh', overflowY: 'auto' }}>
+          <View style={{ padding: 20 }}>
             {sceneIndex ? renderScene({ key: sceneIndex }) : renderScene(routes[index])}
           </View>
         </View>
-      </SafeAreaView>
-    );
-  }
+      </View>
+    </SafeAreaView>
+  );
+}
+
 
   // Móvil
   return (
