@@ -15,45 +15,58 @@ class CitaController extends Controller
         return response()->json($citas);
     }
 
-    public function store(Request $request)
-    {
-        $usuario = auth()->user();
+public function store(Request $request)
+{
+    $usuario = auth()->user();
 
-        $validated = $request->validate([
-            'servicio' => 'required|string',
-            'estilista' => 'required|string',
-            'fecha' => 'required|date',
-            'hora' => 'required|string',
-        ]);
+    $validated = $request->validate([
+        'servicio' => 'required|string',
+        'estilista' => 'required|string',
+        'fecha' => 'required|date',
+        'hora' => 'required|string',
+    ]);
 
-        $existe = Cita::where('fecha', $validated['fecha'])
-            ->where('hora', $validated['hora'])
-            ->where('estilista', $validated['estilista'])
-            ->exists();
+    // Verificar si el usuario ya tiene 3 citas activas
+    $citasActivas = Cita::where('usuario_id', $usuario->id)
+                        ->where('estado', 'agendada')
+                        ->count();
 
-        if ($existe) {
-            return response()->json(['error' => 'Esa hora ya está ocupada para ese estilista.'], 409);
-        }
-
-        // Crear la cita con o sin recargo
-        $cita = Cita::create([
-            'usuario_id' => $usuario->id,
-            'servicio' => $validated['servicio'],
-            'estilista' => $validated['estilista'],
-            'fecha' => $validated['fecha'],
-            'hora' => $validated['hora'],
-            'estado' => 'agendada',
-            'con_recargo' => $usuario->tiene_recargo_pendiente ? true : false,
-        ]);
-
-        // Limpiar el recargo pendiente si ya se aplicó
-        if ($usuario->tiene_recargo_pendiente) {
-            $usuario->tiene_recargo_pendiente = false;
-            $usuario->save();
-        }
-
-        return response()->json(['message' => 'Cita creada', 'cita' => $cita], 201);
+    if ($citasActivas >= 3) {
+        return response()->json([
+            'error' => 'Ya tienes 3 citas activas. Debes esperar a que al menos una sea atendida para agendar otra.'
+        ], 403);
     }
+
+    // Verificar si ya existe una cita para ese estilista en esa fecha y hora
+    $existe = Cita::where('fecha', $validated['fecha'])
+        ->where('hora', $validated['hora'])
+        ->where('estilista', $validated['estilista'])
+        ->exists();
+
+    if ($existe) {
+        return response()->json(['error' => 'Esa hora ya está ocupada para ese estilista.'], 409);
+    }
+
+    // Crear la cita con o sin recargo
+    $cita = Cita::create([
+        'usuario_id' => $usuario->id,
+        'servicio' => $validated['servicio'],
+        'estilista' => $validated['estilista'],
+        'fecha' => $validated['fecha'],
+        'hora' => $validated['hora'],
+        'estado' => 'agendada',
+        'con_recargo' => $usuario->tiene_recargo_pendiente ? true : false,
+    ]);
+
+    // Limpiar el recargo pendiente si ya se aplicó
+    if ($usuario->tiene_recargo_pendiente) {
+        $usuario->tiene_recargo_pendiente = false;
+        $usuario->save();
+    }
+
+    return response()->json(['message' => 'Cita creada', 'cita' => $cita], 201);
+}
+
 
     public function citasPorEstado($estado)
     {

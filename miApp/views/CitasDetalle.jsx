@@ -17,7 +17,7 @@ import {
   obtenerCitasAtendidasEstilista,
 } from '../axiosClient';
 
-const CitasDetalle = ({ route }) => {
+const CitasDetalle = ({ route, navigation }) => {
   const { tipoCita } = route.params || {};
   const [citas, setCitas] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -94,45 +94,57 @@ const cargarCitas = async () => {
     );
   };
 
-  const renderItem = ({ item }) => (
-    <Card style={styles.card}>
-      <Card.Content>
-        <Text style={styles.label}>Servicio: {item.servicio}</Text>
-        <Text style={styles.label}>Estilista: {item.estilista}</Text>
-        <Text style={styles.label}>Fecha: {item.fecha}</Text>
-        <Text style={styles.label}>Hora: {item.hora}</Text>
+const renderItem = ({ item }) => (
+  <Card style={styles.card}>
+    <Card.Content>
+      <Text style={styles.label}>Servicio: {item.servicio}</Text>
+      <Text style={styles.label}>Estilista: {item.estilista}</Text>
+      <Text style={styles.label}>Fecha: {item.fecha}</Text>
+      <Text style={styles.label}>Hora: {item.hora}</Text>
 
-        {item.con_recargo && (
-          <Text style={styles.recargoText}>
-            Esta cita tiene recargo
-          </Text>
-        )}
-      </Card.Content>
-
-      {tipoCita === 'Agendadas' && (
-        <Card.Actions>
-          <Button
-            onPress={() => handleCancelarCita(item.id)}
-            color="red"
-          >
-            Cancelar Cita
-          </Button>
-        </Card.Actions>
+      {item.con_recargo && (
+        <Text style={styles.recargoText}>Esta cita tiene recargo</Text>
       )}
+    </Card.Content>
 
-      {tipoCita === 'PorAtender' && (
-        <Card.Actions>
-          <Button
-            onPress={() => handleMarcarComoAtendida(item.id)}
-            icon="check-circle"
-            color="green"
-          >
-            Marcar como Atendida
-          </Button>
-        </Card.Actions>
-      )}
-    </Card>
-  );
+    {tipoCita === 'Agendadas' && (
+      <Card.Actions>
+        <Button onPress={() => handleCancelarCita(item.id)} color="red">
+          Cancelar Cita
+        </Button>
+      </Card.Actions>
+    )}
+
+    {tipoCita === 'PorAtender' && (
+      <Card.Actions>
+        <Button
+          onPress={() => handleMarcarComoAtendida(item.id)}
+          icon="check-circle"
+          color="green"
+        >
+          Marcar como Atendida
+        </Button>
+      </Card.Actions>
+    )}
+
+    {tipoCita === 'Atendidas' && !item.tiene_resena && (
+      <Card.Actions>
+        <Button
+          mode="outlined"
+          onPress={() =>
+            navigation.navigate('CrearResena', {
+              citaId: item.id,
+              estilista: item.estilista,
+            })
+          }
+        >
+          Dejar Reseña
+        </Button>
+      </Card.Actions>
+    )}
+  </Card>
+);
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -191,6 +203,7 @@ const styles = {
   },
   scrollContainer: {
     padding: 20,
+    paddingTop: 40,
     paddingBottom: 100,
   },
   title: {

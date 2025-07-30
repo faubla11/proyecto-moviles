@@ -20,6 +20,7 @@ import Perfil from './Perfil';
 import CodigosEstilista from './CodigosEstilista';
 import { UserContext } from '../contexts/UserContext';
 import { ThemeContext } from '../contexts/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Dashboard = ({ navigation }) => {
   const isWeb = Platform.OS === 'web';
@@ -112,7 +113,7 @@ const Dashboard = ({ navigation }) => {
     const drawerWidth = menuColapsado ? 72 : 220;
 
     return (
-      <View style={{ flex: 1 }}>
+      <SafeAreaView style={styles.safeArea}>
         <Appbar.Header style={{ justifyContent: 'flex-start' }}>
           <Appbar.Action
             icon={menuColapsado ? 'menu-open' : 'menu'}
@@ -216,7 +217,7 @@ const Dashboard = ({ navigation }) => {
             {sceneIndex ? renderScene({ key: sceneIndex }) : renderScene(routes[index])}
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -229,11 +230,32 @@ const Dashboard = ({ navigation }) => {
         setIndex(newIndex);
       }}
       renderScene={BottomNavigation.SceneMap({
-        dashboard: () => renderScene(mobileRoutes.find(r => r.key === 'dashboard')),
-        perfil: () => renderScene(mobileRoutes.find(r => r.key === 'perfil')),
-        config: () => renderScene(mobileRoutes.find(r => r.key === 'config')),
-        ...(usuario?.es_admin ? { codigos: () => renderScene(mobileRoutes.find(r => r.key === 'codigos')) } : {}),
-      })}
+        dashboard: () => (
+          <SafeAreaView style={{ flex: 1 }}>
+            {renderScene(mobileRoutes.find(r => r.key === 'dashboard'))}
+          </SafeAreaView>
+        ),
+        perfil: () => (
+          <SafeAreaView style={{ flex: 1 }}>
+            {renderScene(mobileRoutes.find(r => r.key === 'perfil'))}
+          </SafeAreaView>
+        ),
+        config: () => (
+          <SafeAreaView style={{ flex: 1 }}>
+            {renderScene(mobileRoutes.find(r => r.key === 'config'))}
+          </SafeAreaView>
+        ),
+        ...(usuario?.es_admin
+          ? {
+              codigos: () => (
+                <SafeAreaView style={{ flex: 1 }}>
+                  {renderScene(mobileRoutes.find(r => r.key === 'codigos'))}
+                </SafeAreaView>
+              ),
+            }
+          : {}),
+      })
+      }
       renderIcon={({ route, focused, color }) => (
         <MaterialCommunityIcons name={route.icon} size={24} color={color} />
       )}

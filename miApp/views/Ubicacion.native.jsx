@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Linking, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Linking } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Text, Button, Card, Paragraph } from 'react-native-paper';
 
@@ -18,18 +18,16 @@ const Ubicacion = () => {
     <View style={styles.container}>
       <MapView
         style={styles.map}
-            initialRegion={{
-            latitude: latitude + 0.0012,
-            longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-            }}
-
+        initialRegion={{
+          latitude: latitude + 0.0012,
+          longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        }}
       >
         <Marker coordinate={{ latitude, longitude }} />
       </MapView>
 
-      {/* Tarjeta fija sobre el marcador */}
       <View style={styles.cardWrapper}>
         <Card style={styles.infoCard}>
           <Card.Title title="📍 Peluquería Mi Estilo" />
@@ -58,7 +56,7 @@ const styles = StyleSheet.create({
   },
   cardWrapper: {
     position: 'absolute',
-    top: Dimensions.get('window').height / 2 - 120, // aproximado al marcador
+    top: Dimensions.get('window').height / 2 - 120,
     left: 20,
     right: 20,
     alignItems: 'center',

@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Card, Paragraph, Button, List, Title } from 'react-native-paper';
 import { UserContext } from '../contexts/UserContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CitasSection = ({ navigation }) => {
   const { usuario } = useContext(UserContext);
@@ -61,17 +62,17 @@ const CitasSection = ({ navigation }) => {
       key: 'ubicacion',
       title: 'Ubicación',
       icon: 'map-marker',
-      description: 'Ver tu ubicación en el mapa.',
+      description: 'Ver ubicación del local.',
       actionText: 'Ver en mapa',
       routeName: 'Ubicacion',
     },
     {
-      key: 'resenas',
-      title: 'Reseñas',
-      icon: 'star-circle',
-      description: 'Reseñas de los clientes.',
-      actionText: 'Leer opiniones',
-      onAction: () => alert('Mostrar reseñas'),
+    key: 'resenas',
+    title: 'Reseñas',
+    icon: 'star-circle',
+    description: 'Reseñas de los clientes.',
+    actionText: 'Leer opiniones',
+    routeName: 'VerResenas',  
     },
   ];
 

@@ -191,6 +191,22 @@ export const marcarCitaComoAtendida = async (id) => {
 };
 
 
+export const enviarResena = async (datos) => {
+  const res = await axiosClient.post('/resenas', datos);
+  return res.data;
+};
+
+export const obtenerResenas = async () => {
+  const res = await axiosClient.get('/resenas');
+  return res.data;
+};
+
+export const filtrarResenas = async (filtros) => {
+  const res = await axiosClient.get('/resenas/filtrar', { params: filtros });
+  return res.data;
+};
+
+
 
 
 export default axiosClient;

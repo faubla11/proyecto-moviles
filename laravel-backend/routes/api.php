@@ -7,6 +7,7 @@ use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\EstilistaController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\CodigoEstilistaController;
+use App\Http\Controllers\ResenaController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -47,5 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/estilista/citas/{id}/atender', [CitaController::class, 'marcarComoAtendida']);
 
     
-
+    Route::get('/resenas', [ResenaController::class, 'index']);
+    Route::post('/resenas', [ResenaController::class, 'store']);
+    Route::get('/resenas/filtrar', [ResenaController::class, 'filtrar']);
 });
