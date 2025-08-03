@@ -101,9 +101,12 @@ const renderItem = ({ item }) => (
       <Text style={styles.label}>Estilista: {item.estilista}</Text>
       <Text style={styles.label}>Fecha: {item.fecha}</Text>
       <Text style={styles.label}>Hora: {item.hora}</Text>
+      <Text style={styles.label}>💰 Total: ${Number(item.precio).toFixed(2)}</Text>
 
       {item.con_recargo && (
-        <Text style={styles.recargoText}>Esta cita tiene recargo</Text>
+      <Text style={{ color: '#FFA726', fontWeight: 'bold' }}>
+      ⚠ Esta cita tuvo un recargo
+      </Text>
       )}
     </Card.Content>
 

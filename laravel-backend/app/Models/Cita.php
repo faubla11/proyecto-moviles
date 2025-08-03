@@ -16,6 +16,7 @@ class Cita extends Model
         'hora',
         'cancelada',
         'atendida',
+        'precio',
         'con_recargo',
         'estado',
     ];

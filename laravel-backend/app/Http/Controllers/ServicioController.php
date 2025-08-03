@@ -3,17 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Servicio;
 
 class ServicioController extends Controller
 {
     public function index()
-    {
-        return response()->json([
-            'Corte de cabello',
-            'Tinte',
-            'Peinado',
-            'Manicure',
-            'Depilación',
-        ]);
-    }
+{
+    return Servicio::all(); // devuelve todos los servicios con sus precios
+}
 }

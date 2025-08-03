@@ -49,11 +49,18 @@ const AtenderCitas = () => {
         citas.map(cita => (
           <Card key={cita.id} style={{ marginBottom: 15, padding: 10 }}>
             <Card.Content>
-              <Text>Cliente: {cita.usuario_id}</Text>
-              <Text>Servicio: {cita.servicio}</Text>
-              <Text>Fecha: {cita.fecha}</Text>
-              <Text>Hora: {cita.hora}</Text>
-            </Card.Content>
+<Text>Cliente: {cita.usuario_id}</Text>
+<Text>Servicio: {cita.servicio}</Text>
+<Text>Fecha: {cita.fecha}</Text>
+<Text>Hora: {cita.hora}</Text>
+<Text>💰 Total: ${Number(cita.precio).toFixed(2)}</Text>
+
+{cita.con_recargo && (
+<Text style={{ color: '#FFA726', fontWeight: 'bold' }}>
+⚠ Esta cita tuvo un recargo
+</Text>
+)}
+</Card.Content>
             <Card.Actions>
               <Button onPress={() => atender(cita.id)}>Marcar como Atendida</Button>
             </Card.Actions>

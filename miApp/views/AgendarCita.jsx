@@ -48,6 +48,9 @@ const AgendarCita = ({ navigation }) => {
   const [tieneRecargo, setTieneRecargo] = useState(false);
   const [mostrarAlertaRecargo, setMostrarAlertaRecargo] = useState(false);
   const [diasBloqueados, setDiasBloqueados] = useState([]); // formato: ['2025-08-01', '2025-08-02']
+  const [precioBase, setPrecioBase] = useState(0);
+  const [precioTotal, setPrecioTotal] = useState(0);
+
 
 
   const showDatePicker = () => {
@@ -76,6 +79,20 @@ useEffect(() => {
   };
   cargarDatos();
 }, []);
+
+useEffect(() => {
+  const seleccionado = servicios.find(s => s.id === servicio);
+  if (seleccionado) {
+    const base = Number(seleccionado.precio) || 0;
+    const total = tieneRecargo ? base + base * 0.5 : base;
+    setPrecioBase(base);
+    setPrecioTotal(total);
+  } else {
+    setPrecioBase(0);
+    setPrecioTotal(0);
+  }
+}, [servicio, tieneRecargo]);
+
 
 
 useEffect(() => {
@@ -106,23 +123,26 @@ const handleAgendar = () => {
     return;
   }
 
-  const ejecutarAgendamiento = async () => {
-    try {
-      await agendarCita({ servicio, estilista, fecha, hora });
+const ejecutarAgendamiento = async () => {
+  try {
+    const servicioNombre = servicios.find(s => s.id === servicio)?.nombre;
 
-      // Limpiar el recargo una vez que ya se aplicó a esta cita
-      setTieneRecargo(false);
-      setMostrarAlertaRecargo(false);
+    await agendarCita({ servicio: servicioNombre, estilista, fecha, hora });
 
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigation.navigate('Dashboard');
-      }, 3000);
-    } catch (error) {
-      console.error('Error al agendar:', error);
-      alert('Error al agendar la cita');
-    }
-  };
+    // Limpiar el recargo una vez que ya se aplicó a esta cita
+    setTieneRecargo(false);
+    setMostrarAlertaRecargo(false);
+
+    setShowSuccess(true);
+    setTimeout(() => {
+      navigation.navigate('Dashboard');
+    }, 3000);
+  } catch (error) {
+    console.error('Error al agendar:', error);
+    alert('Error al agendar la cita');
+  }
+};
+
 
   if (tieneRecargo) {
     if (Platform.OS === 'web') {
@@ -211,15 +231,38 @@ const handleAgendar = () => {
               Agendar Nueva Cita
               </Title>
 
-                    <Text style={styles.label}>Servicio</Text>
-                    <View style={styles.pickerContainer}>
-                      <Picker selectedValue={servicio} onValueChange={setServicio}>
-                        <Picker.Item label="Seleccione un servicio" value="" />
-                        {servicios.map((s, idx) => (
-                          <Picker.Item key={idx} label={s} value={s} />
-                        ))}
-                      </Picker>
-                    </View>
+                        <Text style={styles.label}>Servicio</Text>
+                        <View style={styles.pickerContainer}>
+                          <Picker
+                            selectedValue={servicio}
+                            onValueChange={(value) => {
+                              setServicio(value);
+                              // Ya no necesitas calcular el precio aquí, eso lo hace el useEffect
+                            }}
+                          >
+                            <Picker.Item label="Seleccione un servicio" value="" />
+                            {servicios.map((s) => (
+                              <Picker.Item key={s.id} label={s.nombre} value={s.id} />
+                            ))}
+                          </Picker>
+
+                          {typeof precioBase === 'number' && (
+                        <View style={{ marginVertical: 10 }}>
+                          <Text style={{ fontSize: 16, color: '#333' }}>
+                            💲 Precio base: ${precioBase.toFixed(2)}
+                          </Text>
+                          {tieneRecargo && (
+                            <Text style={{ fontSize: 16, color: '#FFA726', fontWeight: 'bold' }}>
+                              ⚠ Recargo aplicado: 50% extra
+                            </Text>
+                          )}
+                          <Text style={{ fontSize: 18, color: '#000', fontWeight: 'bold' }}>
+                            💳 Total a pagar: ${precioTotal.toFixed(2)}
+                          </Text>
+                        </View>
+                      )}
+                        </View>
+
 
                     <Text style={styles.label}>Estilista</Text>
                     <View style={styles.pickerContainer}>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cita;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\Servicio; 
 
 class CitaController extends Controller
 {
@@ -66,24 +67,42 @@ public function store(Request $request)
     }
 
     // Crear la cita
-    $cita = \App\Models\Cita::create([
-        'usuario_id' => $usuario->id,
-        'servicio' => $validated['servicio'],
-        'estilista' => $validated['estilista'],
-        'fecha' => $validated['fecha'],
-        'hora' => $validated['hora'],
-        'estado' => 'agendada',
-        'con_recargo' => $usuario->tiene_recargo_pendiente ? true : false,
+    // Obtener precio del servicio desde la base de datos
+    $servicioBD = Servicio::where('nombre', $validated['servicio'])->first();
+
+    if (!$servicioBD) {
+    return response()->json(['error' => 'Servicio no encontrado.'], 404);
+    }
+
+    // Calcular el precio final
+    $precioFinal = $servicioBD->precio;
+    $conRecargo = false;
+
+    if ($usuario->tiene_recargo_pendiente) {
+    $precioFinal += $precioFinal / 2; // 50% de recargo
+    $conRecargo = true;
+    }
+
+    // Crear la cita
+    $cita = Cita::create([
+    'usuario_id' => $usuario->id,
+    'servicio' => $validated['servicio'],
+    'estilista' => $validated['estilista'],
+    'fecha' => $validated['fecha'],
+    'hora' => $validated['hora'],
+    'estado' => 'agendada',
+    'precio' => $precioFinal,
+    'con_recargo' => $conRecargo,
     ]);
 
     // Limpiar recargo si se aplicó
-    if ($usuario->tiene_recargo_pendiente) {
-        $usuario->tiene_recargo_pendiente = false;
-        $usuario->save();
+    if ($conRecargo) {
+    $usuario->tiene_recargo_pendiente = false;
+    $usuario->save();
     }
 
-    return response()->json(['message' => 'Cita creada', 'cita' => $cita], 201);
-}
+        return response()->json(['message' => 'Cita creada', 'cita' => $cita], 201);
+    }
 
 
 
