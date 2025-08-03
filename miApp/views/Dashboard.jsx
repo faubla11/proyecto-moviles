@@ -260,9 +260,21 @@ if (isWeb) {
           : {}),
       })
       }
-      renderIcon={({ route, focused, color }) => (
-        <MaterialCommunityIcons name={route.icon} size={24} color={color} />
-      )}
+      renderIcon={({ route, focused, color }) => {
+  if (route.key === 'perfil') {
+    return usuario?.foto_uri ? (
+      <Avatar.Image
+        size={24}
+        source={{ uri: `${usuario.foto_uri}?t=${new Date().getTime()}` }}
+        style={{ backgroundColor: 'transparent' }}
+      />
+    ) : (
+      <MaterialCommunityIcons name="account" size={24} color={color} />
+    );
+  }
+
+  return <MaterialCommunityIcons name={route.icon} size={24} color={color} />;
+}}
     />
   );
 };

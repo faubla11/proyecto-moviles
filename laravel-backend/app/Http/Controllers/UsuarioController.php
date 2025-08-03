@@ -125,4 +125,34 @@ public function actualizarPerfil(Request $request)
         'perfil' => $perfil
     ]);
 }
+
+public function actualizarFoto(Request $request)
+{
+    $usuario = $request->user();
+
+    $request->validate([
+        'foto' => 'required|image|mimes:jpg,jpeg,png',
+    ]);
+
+    if ($request->hasFile('foto')) {
+        // Elimina la foto anterior si existe
+        if ($usuario->foto_uri) {
+            $rutaAnterior = str_replace(asset('storage') . '/', '', $usuario->foto_uri);
+            \Storage::disk('public')->delete($rutaAnterior);
+        }
+
+        // Guarda la nueva foto
+        $nombreArchivo = 'foto_' . $usuario->id . '.' . $request->foto->extension();
+        $ruta = $request->foto->storeAs('fotos_perfil', $nombreArchivo, 'public');
+
+        $usuario->foto_uri = asset('storage/' . $ruta);
+        $usuario->save();
+
+        return response()->json(['foto_uri' => $usuario->foto_uri], 200);
+    }
+
+    return response()->json(['error' => 'No se recibió la foto'], 400);
+}
+
+
 }

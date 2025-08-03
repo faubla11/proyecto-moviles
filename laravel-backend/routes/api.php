@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/perfil', [UsuarioController::class, 'obtenerPerfil']);
     Route::put('/perfil', [UsuarioController::class, 'actualizarPerfil']);
+    Route::post('/perfil/foto', [UsuarioController::class, 'actualizarFoto']);
+
 
     //Citas Agendadas, Canceladas y Atendidas
     Route::get('/citas', [CitaController::class, 'index']);
