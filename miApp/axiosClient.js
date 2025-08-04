@@ -218,4 +218,10 @@ export const bloquearEstilista = async (datos) => {
   return res.data;
 };
 
+export const iniciarPagoCita = async (citaId) => {
+  const res = await axiosClient.post(`/pago/cita/${citaId}`);
+  return res.data;
+};
+
+
 export default axiosClient;

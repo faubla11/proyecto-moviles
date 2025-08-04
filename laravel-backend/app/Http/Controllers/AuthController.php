@@ -54,7 +54,7 @@ class AuthController extends Controller
             'nombre' => '',
             'apellido' => '',
             'edad' => 0,
-            'cedula' => '',
+            'cedula' => null,
             'direccion' => '',
             'telefono' => ''
         ]);

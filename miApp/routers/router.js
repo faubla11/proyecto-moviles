@@ -2,8 +2,10 @@ import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { UserContext } from '../contexts/UserContext';
-import { SafeAreaProvider } from 'react-native-safe-area-context'; // ✅
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 
+// Vistas
 import Login from '../views/Login';
 import Register from '../views/Register';
 import Dashboard from '../views/Dashboard';
@@ -16,6 +18,20 @@ import BloqueoEstilistas from '../views/BloqueoEstilistas';
 
 const Stack = createNativeStackNavigator();
 
+// 👉 Deep linking config
+const linking = {
+  prefixes: ['miapp://'],
+  config: {
+    screens: {
+      Dashboard: 'pago-exitoso', // Esto enlaza miapp://pago-exitoso a Dashboard
+      // Puedes mapear más rutas si quieres que se abran desde enlaces
+      // por ejemplo:
+      // Login: 'login',
+      // AgendarCita: 'agendar',
+    },
+  },
+};
+
 const Router = () => {
   const { usuario, cargando } = useContext(UserContext);
 
@@ -23,7 +39,7 @@ const Router = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {usuario ? (
             <>

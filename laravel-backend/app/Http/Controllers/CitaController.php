@@ -113,7 +113,7 @@ public function store(Request $request)
 
         switch (strtolower($estado)) {
             case 'agendadas':
-                $query->where('estado', 'agendada');
+                $query->whereIn('estado', ['agendada', 'pagada']);
                 break;
             case 'canceladas':
                 $query->where('estado', 'cancelada');

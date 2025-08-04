@@ -9,6 +9,8 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\CodigoEstilistaController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\BloqueoEstilistaController;
+use App\Http\Controllers\PagoController;
+use App\Http\Controllers\WebhookController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -61,4 +63,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bloquear-estilista', [BloqueoEstilistaController::class, 'listar']);
     Route::get('/dias-bloqueados', [BloqueoEstilistaController::class, 'diasBloqueados']);
 
+    Route::post('/pago/cita/{id}', [PagoController::class, 'iniciarPago']);
+    Route::post('/cita/{id}/marcar-pagada', [PagoController::class, 'marcarComoPagada']);
+
+   // Route::post('/cita/verificar-pago', [PagoController::class, 'verificarPago']);
+
+
 });
+
+
+    Route::post('/cita/verificar-pago', [PagoController::class, 'verificarPago']);
+    // Webhook para PayPhone
+    Route::post('/webhook/payphone', [  WebhookController::class, 'notificarPago']);

@@ -22,6 +22,7 @@ import { UserContext } from '../contexts/UserContext';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native';
+import * as Linking from 'expo-linking';
 
 
 const Dashboard = ({ navigation }) => {
@@ -80,6 +81,7 @@ const Dashboard = ({ navigation }) => {
       case 'perfil':
         return <Perfil />;
       case 'config':
+        
         return (
           <View style={styles.scene}>
             <Title style={styles.title}>Configuración</Title>

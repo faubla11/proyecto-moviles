@@ -9,7 +9,8 @@ return [
     'allowed_origins' => [
         'http://localhost:8081',
         'http://localhost:19006',
-        'http://192.168.0.105:19006',
+        'http://192.168.0.104:19006',
+        'https://0c02b3631832.ngrok-free.app',
     ],
 
     'allowed_origins_patterns' => [],
